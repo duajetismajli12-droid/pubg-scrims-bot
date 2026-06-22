@@ -1,3 +1,15 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('Boti është online!');
+});
+
+app.listen(port, () => {
+  console.log(`Serveri për UptimeRobot është ndezur në portin ${port}`);
+});
+
 // Importimi i konfigurimeve
 const config = require('./config.js');
 
@@ -208,7 +220,7 @@ if (command === 'anulo') {
     pendingBets.delete(message.author.id);
     
     console.log("Basti u anulua me sukses për:", message.author.id);
-    message.reply("✅ Basti juaj u anulua me sukses.");
+    message.reply("✅ Basti juaj    u anulua me sukses.");
 }
 
     // 3. SHPALLJA E FITUESIT NGA 25 EKIPET
