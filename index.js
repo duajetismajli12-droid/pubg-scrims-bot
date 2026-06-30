@@ -34,7 +34,6 @@ const pendingBets = new Map();
 
 let adminUsername = 'Admin';
 
-// RREGULLIMI: Ndryshuar nga 'clientReady' në 'ready'
 client.once('ready', async () => {
     console.log(`[PUBG SCRIMS] Bot u lidh me sukses! Optimizuar për 25+ ekipe.`);
     
@@ -129,13 +128,14 @@ client.on('messageCreate', async message => {
             .setColor('#f39c12')
             .setFooter({ text: 'Voto: !bet <MatchID> <Shuma> <EmriEkipit>' });
 
-        const channel = message.guild.channels.cache.find(c => c.name.includes('match-predictions'));
+        // NDRYSHIMI: Leximi direkt nga ID-ja e .env për kanalin e parashikimeve
+        const channel = message.guild.channels.cache.get(process.env.MATCH_PREDICTIONS_CHANNEL_ID);
         if (channel) {
             channel.send({ embeds: [embed] }).catch(err => {
-                message.reply(`❌ Gabim: Boti nuk ka leje të shkruajë në kanalin #${channel.name}. Kontrollo lejet e botit!`);
+                message.reply(`❌ Gabim: Boti nuk ka leje (Missing Permissions) të shkruajë në kanalin <#${channel.id}>. Kontrollo lejet!`);
             });
         } else {
-            message.reply("⚠️ Nuk u gjet asnjë kanal me emrin `match-predictions`.");
+            message.reply("⚠️ Kanali i parashikimeve nuk u gjet. Kontrollo ID-në te `.env`.");
         }
         message.reply(`Parashikimi për lobby-n ${matchId} u hap me sukses.`);
     }
@@ -157,7 +157,6 @@ client.on('messageCreate', async message => {
             return message.reply(`🚫 Basti duhet të jetë midis ${match.minBet} dhe ${match.maxBet} OwO.`);
         }
 
-        // Rregulluar logjika e timerit këtu që mos të ketë dyfishim të pendingBets
         const timeout = setTimeout(() => {
             if (pendingBets.has(message.author.id)) {
                 pendingBets.delete(message.author.id);
@@ -223,11 +222,14 @@ client.on('messageCreate', async message => {
             .setDescription(`**WWCD (Fituesi):** 🏆 **${winningTeam.toUpperCase()}**\n\n**Totali i Monedhave në lojë:** ${match.totalPool} OwO\n\n**Shpërndarja e fituesve:**\n${payoutLog}`)
             .setColor('#2ecc71');
 
-        const resultsChannel = message.guild.channels.cache.find(c => c.name.includes('prediction-results'));
+        // NDRYSHIMI: Leximi direkt nga ID-ja e .env për kanalin e rezultateve
+        const resultsChannel = message.guild.channels.cache.get(process.env.PREDICTION_RESULTS_CHANNEL_ID);
         if (resultsChannel) {
             resultsChannel.send({ embeds: [resultEmbed] }).catch(err => {
-                message.reply(`❌ Gabim: Boti nuk mund të dërgonte rezultatet në #${resultsChannel.name}. Mungojnë lejet.`);
+                message.reply(`❌ Gabim: Boti nuk mund të dërgonte rezultatet në kanalin <#${resultsChannel.id}>. Mungojnë lejet.`);
             });
+        } else {
+            message.reply("⚠️ Kanali i rezultateve nuk u gjet. Kontrollo ID-në te `.env`.");
         }
         
         matchPredictions.delete(matchId);
